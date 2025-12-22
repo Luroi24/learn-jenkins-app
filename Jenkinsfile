@@ -1,13 +1,14 @@
 pipeline {
-    agent{
-        docker{
-            image 'node:18-alpine'
-            reuseNode true
-        }
-    }
+    agent any
 
     stages {
         stage('Build') {
+            agent{
+                docker{
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
             steps {
                 sh '''
                     ls -la
@@ -21,13 +22,24 @@ pipeline {
         }
 
         stage('Test') {
-            // Go into build folder and check that there is an index.html
+            agent{
+                docker{
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
             steps{
                 sh '''
                     test build/build.html
                     npm test
                 '''
             }
+        }
+    }
+
+    post {
+        always {
+            junit 'test-results/junit.xml'
         }
     }
 }
