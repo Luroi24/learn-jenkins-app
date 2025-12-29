@@ -91,5 +91,30 @@ pipeline {
                 '''
             }
         }
+
+        stage('Prod E2E') {
+            environment{
+                NETLIFY_SITE_ID = 'a9c7e4e3-c6f4-4d13-a3c3-dd6502d92bbd'
+                CI_ENVIRONMENT_URL = 'https://meek-gecko-c43402.netlify.app'
+                NETLIFY_AUTH_TOKEN = credentials('token-netlify')
+            }
+            agent{
+                docker{
+                    image 'mcr.microsoft.com/playwright:v1.57.0-noble'
+                    reuseNode true
+                }
+            }
+            steps{
+                sh '''
+
+                    npx playwright test --reporter=html
+                '''
+            }
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+                }
+            }
+        }
     }
 }
