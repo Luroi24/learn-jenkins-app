@@ -89,9 +89,9 @@ pipeline {
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --json > netlify_build.json
                 '''
-            }
-            script{
-                env.STAGING_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' netlify_build.json", returnStdout: true)
+                script{
+                    env.STAGING_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' netlify_build.json", returnStdout: true)
+                }
             }
         }
 
