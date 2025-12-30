@@ -4,6 +4,7 @@ pipeline {
     environment {
         NETLIFY_SITE_ID = 'a9c7e4e3-c6f4-4d13-a3c3-dd6502d92bbd'
         NETLIFY_AUTH_TOKEN = credentials('token-netlify')
+        REACT_APP_VERSION = '1.2.3'
     }
 
     stages {
@@ -100,14 +101,6 @@ pipeline {
             post {
                 always {
                     publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Staging E2E HTML Report', reportTitles: '', useWrapperFileDirectly: true])
-                }
-            }
-        }
-
-        stage('Approval'){
-            steps{
-                timeout(time: 15, unit: 'MINUTES'){
-                    input message:"Do you wish to deploy to production?", ok:"Yes, I am sure!"
                 }
             }
         }
