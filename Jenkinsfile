@@ -107,7 +107,6 @@ pipeline {
             }
             steps{
                 sh '''
-
                     npx playwright test --reporter=html
                 '''
             }
@@ -126,25 +125,7 @@ pipeline {
             }
         }
 
-        stage('Deploy Prod') {
-            agent{
-                docker{
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh '''
-                    npm install netlify-cli@20.1.1
-                    node_modules/.bin/netlify --version
-                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --prod
-                '''
-            }
-        }
-
-        stage('Prod E2E') {
+        stage('Deploy prod & Test') {
             environment{
                 NETLIFY_SITE_ID = 'a9c7e4e3-c6f4-4d13-a3c3-dd6502d92bbd'
                 CI_ENVIRONMENT_URL = 'https://meek-gecko-c43402.netlify.app'
@@ -158,6 +139,11 @@ pipeline {
             }
             steps{
                 sh '''
+                    npm install netlify-cli@20.1.1
+                    node_modules/.bin/netlify --version
+                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+                    node_modules/.bin/netlify status
+                    node_modules/.bin/netlify deploy --dir=build --prod
 
                     npx playwright test --reporter=html
                 '''
