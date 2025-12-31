@@ -8,6 +8,11 @@ pipeline {
     }
 
     stages {
+        stage('Docker'){
+            steps{
+                sh'docker build -t my-playwright .'
+            }
+        }
         // This is a comment
         stage('Build') {
             agent{
@@ -75,7 +80,7 @@ pipeline {
             }
         }
 
-        stage('Staging E2E') {
+        stage('Deploy staging') {
             agent{
                 docker{
                     image 'mcr.microsoft.com/playwright:v1.57.0-noble'
