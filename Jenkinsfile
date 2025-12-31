@@ -16,9 +16,12 @@ pipeline {
                 }
             }
             steps{
-                sh '''
-                    aws --version
-                '''
+                withCredentials([usernamePassword(credentialsId: 'secret-aws-cli', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                    sh '''
+                        aws --version
+                        aws s3 ls
+                    '''
+                }
             }
         }
         // This is a comment
@@ -87,59 +90,60 @@ pipeline {
             }
         }
 
-        stage('Deploy staging') {
-            agent{
-                docker{
-                    image 'my-playwright'
-                    reuseNode true
-                }
-            }
+        // stage('Deploy staging') {
+        //     agent{
+        
+        //         docker{
+        //             image 'my-playwright'
+        //             reuseNode true
+        //         }
+        //     }
 
-            environment{
-                CI_ENVIRONMENT_URL = 'TBD'
-            }
+        //     environment{
+        //         CI_ENVIRONMENT_URL = 'TBD'
+        //     }
 
-            steps{
-                sh '''
-                    echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
-                    netlify status
-                    netlify deploy --dir=build --json > netlify_build.json
-                    CI_ENVIRONMENT_URL=$(jq -r '.deploy_url' netlify_build.json)
-                    npx playwright test --reporter=html
-                '''
-            }
-            post {
-                always {
-                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Staging E2E HTML Report', reportTitles: '', useWrapperFileDirectly: true])
-                }
-            }
-        }
+        //     steps{
+        //         sh '''
+        //             echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
+        //             netlify status
+        //             netlify deploy --dir=build --json > netlify_build.json
+        //             CI_ENVIRONMENT_URL=$(jq -r '.deploy_url' netlify_build.json)
+        //             npx playwright test --reporter=html
+        //         '''
+        //     }
+        //     post {
+        //         always {
+        //             publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Staging E2E HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+        //         }
+        //     }
+        // }
 
-        stage('Deploy prod & Test') {
-            environment{
-                CI_ENVIRONMENT_URL = 'https://meek-gecko-c43402.netlify.app'
-            }
-            agent{
-                docker{
-                    image 'my-playwright'
-                    reuseNode true
-                }
-            }
-            steps{
-                sh '''
-                    netlify --version
-                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
-                    netlify status
-                    netlify deploy --dir=build --prod
+        // stage('Deploy prod & Test') {
+        //     environment{
+        //         CI_ENVIRONMENT_URL = 'https://meek-gecko-c43402.netlify.app'
+        //     }
+        //     agent{
+        //         docker{
+        //             image 'my-playwright'
+        //             reuseNode true
+        //         }
+        //     }
+        //     steps{
+        //         sh '''
+        //             netlify --version
+        //             echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+        //             netlify status
+        //             netlify deploy --dir=build --prod
 
-                    npx playwright test --reporter=html
-                '''
-            }
-            post {
-                always {
-                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Prod E2E HTML Report', reportTitles: '', useWrapperFileDirectly: true])
-                }
-            }
-        }
+        //             npx playwright test --reporter=html
+        //         '''
+        //     }
+        //     post {
+        //         always {
+        //             publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Prod E2E HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+        //         }
+        //     }
+        // }
     }
 }
