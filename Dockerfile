@@ -1,4 +1,4 @@
 FROM mcr.microsoft.com/playwright:v1.57.0-noble
 RUN npm install -g netlify-cli serve
 RUN apt update
-RUN apt instlal jq -y
+RUN apt install jq -y
